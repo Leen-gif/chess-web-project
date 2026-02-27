@@ -1,0 +1,120 @@
+﻿<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chess Frontend - Spiel hosten</title>
+  <style>
+    :root {
+      --bg: #f0d9b5;
+      --panel: #ffffff;
+      --text: #1f2937;
+      --accent: #1f5ea8;
+      --accent-hover: #184a84;
+      --border: #dbe3ef;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(145deg, #081a3a 0%, #02040a 100%);
+      background-attachment: fixed;
+      color: var(--text);
+    }
+
+    .page {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 24px;
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+    }
+
+    .content-panel {
+      flex: 1;
+      min-width: 0;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      box-shadow: 0 10px 24px rgba(31, 41, 55, 0.08);
+    }
+
+    .menu-panel {
+      width: 280px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 10px 24px rgba(31, 41, 55, 0.08);
+    }
+
+    .menu-title {
+      margin: 0 0 16px;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .menu-links {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .menu-link, .primary-btn {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      min-height: 46px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+    }
+
+    .menu-link:hover, .primary-btn:hover { background: var(--accent-hover); }
+
+    .stack {
+      display: grid;
+      gap: 12px;
+      max-width: 340px;
+    }
+
+    @media (max-width: 900px) {
+      .page { flex-direction: column; }
+      .menu-panel { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="content-panel">
+      <h1>Spiel hosten</h1>
+      <div class="stack">
+        <button class="primary-btn" type="button">Spiel erstellen</button>
+        <a class="primary-btn" href="index.html">Zurück</a>
+      </div>
+    </section>
+
+    <aside class="menu-panel" aria-label="Hauptnavigation">
+      <h2 class="menu-title">Menü</h2>
+      <nav class="menu-links">
+        <a class="menu-link" href="index.html">Hauptmenu</a>
+        <a class="menu-link" href="bot.html">Gegen Bot</a>
+        <a class="menu-link" href="duo.html">PVP</a>
+      </nav>
+    </aside>
+  </main>
+</body>
+</html>
+

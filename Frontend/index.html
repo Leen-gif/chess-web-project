@@ -1,0 +1,264 @@
+﻿<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chess Frontend - Hauptmenü</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard.js/1.0.0/chessboard-1.0.0.min.css">
+  <style>
+    :root {
+      --bg: #f0d9b5;
+      --panel: #ffffff;
+      --text: #1f2937;
+      --accent: #1f5ea8;
+      --accent-hover: #184a84;
+      --border: #dbe3ef;
+      --white-square: #f0d9b5;
+      --black-square: #4a6fa5;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(145deg, #081a3a 0%, #02040a 100%);
+      background-attachment: fixed;
+      color: var(--text);
+    }
+
+    .page {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 24px;
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+
+    .board-panel,
+    .content-panel {
+      flex: 1;
+      min-width: 0;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 10px 24px rgba(31, 41, 55, 0.08);
+    }
+
+    .board-panel {
+      display: flex;
+      flex-direction: column;
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+      padding: 0;
+    }
+
+    .board-wrap {
+      width: min(72vw, 820px);
+      max-width: 100%;
+      margin: 0 auto;
+    }
+
+    #board {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+    }
+
+    .menu-panel {
+      width: 280px;
+      background: var(--panel);
+      border: 0;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 10px 24px rgba(31, 41, 55, 0.08);
+    }
+
+    .menu-title {
+      margin: 0 0 16px;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .menu-links {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .menu-link,
+    .primary-btn {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      min-height: 46px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+    }
+
+    .menu-link:hover,
+    .primary-btn:hover {
+      background: var(--accent-hover);
+    }
+
+    .secondary-link {
+      background: #fff;
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .secondary-link:hover {
+      background: #eef5ff;
+    }
+
+    .menu-image-link {
+      display: block;
+      width: 100%;
+      text-decoration: none;
+    }
+
+    .menu-field-image {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: calc(100vh - 180px);
+      margin: 0 auto 18px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 24px rgba(31, 41, 55, 0.14);
+      object-fit: contain;
+    }
+
+    .white-1e1d7 {
+      background-color: var(--white-square) !important;
+    }
+
+    .black-3c85d {
+      background-color: var(--black-square) !important;
+    }
+
+    @media (max-width: 900px) {
+      .page {
+        flex-direction: column;
+      }
+
+      .menu-panel {
+        width: 100%;
+      }
+
+      .board-wrap {
+        width: min(95vw, 620px);
+      }
+
+      .menu-field-image {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="board-panel" aria-label="Schachbrett Bereich">
+      <a class="menu-image-link" href="duo.html" aria-label="Gegen eine andere Person spielen">
+        <img class="menu-field-image" src="chess_board.jpg" alt="Schachbrett Bild - Klicke für PVP">
+      </a>
+      <div class="board-wrap">
+        <div id="board"></div>
+      </div>
+    </section>
+
+    <aside class="menu-panel" aria-label="Hauptnavigation">
+      <h2 class="menu-title">Menü</h2>
+      <nav class="menu-links">
+        <a class="menu-link" href="index.html">Hauptmenu</a>
+        <a class="menu-link" href="bot.html">Gegen Bot</a>
+        <a class="menu-link" href="duo.html">PVP</a>
+      </nav>
+    </aside>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.13.4/chess.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard.js/1.0.0/chessboard-1.0.0.min.js"></script>
+  <script>
+    const game = new Chess();
+    let hasStarted = false;
+
+    const board = Chessboard("board", {
+      draggable: true,
+      dropOffBoard: "snapback",
+      position: "empty",
+      pieceTheme: "https://cdnjs.cloudflare.com/ajax/libs/chessboard.js/1.0.0/img/chesspieces/wikipedia/{piece}.png",
+      onDragStart,
+      onDrop,
+      onSnapEnd
+    });
+
+    const boardEl = document.getElementById("board");
+
+    boardEl.addEventListener("click", (event) => {
+      if (hasStarted) return;
+      const clickedSquare = event.target.closest(".square-55d63");
+      if (!clickedSquare) return;
+      startGame();
+    });
+
+    window.addEventListener("resize", () => board.resize());
+
+    function startGame() {
+      hasStarted = true;
+      game.reset();
+      board.position(game.fen());
+    }
+
+    function onDragStart(source, piece) {
+      if (!hasStarted) return false;
+      if (game.game_over()) return false;
+
+      const turn = game.turn();
+      if ((turn === "w" && piece.startsWith("b")) || (turn === "b" && piece.startsWith("w"))) {
+        return false;
+      }
+
+      return true;
+    }
+
+    function onDrop(source, target) {
+      if (!hasStarted) return "snapback";
+
+      const move = game.move({
+        from: source,
+        to: target,
+        promotion: "q"
+      });
+
+      if (move === null) {
+        return "snapback";
+      }
+
+      return undefined;
+    }
+
+    function onSnapEnd() {
+      if (!hasStarted) return;
+      board.position(game.fen());
+    }
+
+  </script>
+</body>
+</html>
+
