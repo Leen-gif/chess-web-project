@@ -192,8 +192,20 @@
           piece.alt = pieceCode;
           piece.draggable = true;
 
-          piece.addEventListener("dragstart", () => {
+          piece.addEventListener("dragstart", (event) => {
             draggedPiece = piece;
+            event.dataTransfer.effectAllowed = "move";
+            event.dataTransfer.setData("text/plain", piece.alt);
+            const rect = piece.getBoundingClientRect();
+            const dragSize = Math.max(1, Math.round(Math.min(rect.width, rect.height)));
+            const dragCanvas = document.createElement("canvas");
+            dragCanvas.width = dragSize;
+            dragCanvas.height = dragSize;
+            const ctx = dragCanvas.getContext("2d");
+            if (ctx) {
+              ctx.drawImage(piece, 0, 0, dragSize, dragSize);
+              event.dataTransfer.setDragImage(dragCanvas, dragSize / 2, dragSize / 2);
+            }
           });
 
           piece.addEventListener("dragend", () => {
