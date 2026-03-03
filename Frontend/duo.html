@@ -128,16 +128,22 @@
   </style>
 </head>
 <body>
+  <!-- - Main page wrapper for content and side menu. -->
   <main class="page">
+    <!-- - Main content area with headline and board placeholder. -->
     <section class="content-panel">
       <h1>PVP</h1>
       <p>Spiele gegen eine andere Person - bald verfügbar!</p>
+      <!-- - Placeholder board where pieces are rendered by JavaScript. -->
       <div id="pvp-board" class="board-placeholder" aria-label="Schachbrett Platzhalter"></div>
+      <!-- - Button to return to home page. -->
       <a class="primary-btn" href="index.html">Zurück</a>
     </section>
 
+    <!-- - Side menu with quick links. -->
     <aside class="menu-panel" aria-label="Hauptnavigation">
       <h2 class="menu-title">Menü</h2>
+      <!-- - Main navigation for all pages. -->
       <nav class="menu-links">
         <a class="menu-link" href="index.html">Hauptmenu</a>
         <a class="menu-link" href="bot.html">Gegen Bot</a>
@@ -147,6 +153,8 @@
   </main>
 
   <script>
+    // - Get board container from the page.
+    // - Define helper data for files and starting setup.
     const boardElement = document.getElementById("pvp-board");
     const files = ["a", "b", "c", "d", "e", "f", "g", "h"];
     const initialPosition = {
@@ -156,8 +164,11 @@
       a1: "wr", b1: "wn", c1: "wb", d1: "wq", e1: "wk", f1: "wb", g1: "wn", h1: "wr"
     };
 
+    // - Store the currently dragged piece between events.
     let draggedPiece = null;
 
+    // - Build all 64 squares.
+    // - Add drag/drop handlers to each square.
     for (let rank = 8; rank >= 1; rank--) {
       for (let fileIndex = 0; fileIndex < 8; fileIndex++) {
         const square = document.createElement("div");
@@ -175,15 +186,18 @@
           event.preventDefault();
           if (!draggedPiece) return;
 
+          // - If target square has another piece, remove it.
           const occupyingPiece = square.querySelector(".board-piece");
           if (occupyingPiece && occupyingPiece !== draggedPiece) {
             occupyingPiece.remove();
           }
 
+          // - Move dragged piece to new square.
           square.appendChild(draggedPiece);
           draggedPiece = null;
         });
 
+        // - If this square has a start piece, render it.
         const pieceCode = initialPosition[squareName];
         if (pieceCode) {
           const piece = document.createElement("img");
@@ -193,6 +207,8 @@
           piece.draggable = true;
 
           piece.addEventListener("dragstart", (event) => {
+            // - Save the dragged piece.
+            // - Use a canvas ghost with same visual size.
             draggedPiece = piece;
             event.dataTransfer.effectAllowed = "move";
             event.dataTransfer.setData("text/plain", piece.alt);
@@ -209,6 +225,7 @@
           });
 
           piece.addEventListener("dragend", () => {
+            // - Clear drag state after drop/cancel.
             draggedPiece = null;
           });
 

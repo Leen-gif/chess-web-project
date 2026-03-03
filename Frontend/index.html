@@ -176,18 +176,24 @@
   </style>
 </head>
 <body>
+  <!-- - Main page wrapper for board and side menu. -->
   <main class="page">
+    <!-- - Left section with preview image and playable board. -->
     <section class="board-panel" aria-label="Schachbrett Bereich">
+      <!-- - Clickable image that links to the PVP page. -->
       <a class="menu-image-link" href="duo.html" aria-label="Gegen eine andere Person spielen">
         <img class="menu-field-image" src="chess_board.jpg" alt="Schachbrett Bild - Klicke für PVP">
       </a>
+      <!-- - Container used by chessboard.js to render the board. -->
       <div class="board-wrap">
         <div id="board"></div>
       </div>
     </section>
 
+    <!-- - Right section with quick navigation links. -->
     <aside class="menu-panel" aria-label="Hauptnavigation">
       <h2 class="menu-title">Menü</h2>
+      <!-- - Main navigation for all pages. -->
       <nav class="menu-links">
         <a class="menu-link" href="index.html">Hauptmenu</a>
         <a class="menu-link" href="bot.html">Gegen Bot</a>
@@ -199,9 +205,13 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.13.4/chess.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard.js/1.0.0/chessboard-1.0.0.min.js"></script>
   <script>
+    // - Create the chess rules engine.
+    // - Store if the user already started the game.
     const game = new Chess();
     let hasStarted = false;
 
+    // - Build the visual board.
+    // - Connect drag/drop callbacks to our logic below.
     const board = Chessboard("board", {
       draggable: true,
       dropOffBoard: "snapback",
@@ -214,6 +224,8 @@
 
     const boardEl = document.getElementById("board");
 
+    // - Start game on first board click.
+    // - Ignore clicks outside board squares.
     boardEl.addEventListener("click", (event) => {
       if (hasStarted) return;
       const clickedSquare = event.target.closest(".square-55d63");
@@ -221,18 +233,24 @@
       startGame();
     });
 
+    // - Keep board size responsive when window size changes.
     window.addEventListener("resize", () => board.resize());
 
     function startGame() {
+      // - Mark game as started.
+      // - Reset to initial position.
       hasStarted = true;
       game.reset();
       board.position(game.fen());
     }
 
     function onDragStart(source, piece) {
+      // - Block moves before game start.
+      // - Block moves after game is over.
       if (!hasStarted) return false;
       if (game.game_over()) return false;
 
+      // - Allow only the side whose turn it is.
       const turn = game.turn();
       if ((turn === "w" && piece.startsWith("b")) || (turn === "b" && piece.startsWith("w"))) {
         return false;
@@ -242,14 +260,18 @@
     }
 
     function onDrop(source, target) {
+      // - If game not started, snap piece back.
       if (!hasStarted) return "snapback";
 
+      // - Try to make the move in chess.js.
+      // - Promote to queen by default.
       const move = game.move({
         from: source,
         to: target,
         promotion: "q"
       });
 
+      // - Illegal move: return piece to source square.
       if (move === null) {
         return "snapback";
       }
@@ -258,6 +280,7 @@
     }
 
     function onSnapEnd() {
+      // - Sync visual board with current game state.
       if (!hasStarted) return;
       board.position(game.fen());
     }
