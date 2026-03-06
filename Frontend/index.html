@@ -4,288 +4,193 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chess Frontend - Hauptmenü</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard.js/1.0.0/chessboard-1.0.0.min.css">
   <style>
     :root {
-      --bg: #f0d9b5;
-      --panel: #ffffff;
-      --text: #1f2937;
-      --accent: #1f5ea8;
-      --accent-hover: #184a84;
-      --border: #dbe3ef;
-      --white-square: #f0d9b5;
-      --black-square: #4a6fa5;
+      --bg-a: #121416;
+      --bg-b: #1a1d21;
+      --panel: #262421;
+      --line: #3d3a35;
+      --text: #f0f0f0;
+      --muted: #b7b7b7;
+      --accent: #3a7bd5;
+      --accent-hover: #2f66b1;
+      --light: #e8eef8;
+      --dark: #4a6fa5;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
       min-height: 100vh;
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(145deg, #081a3a 0%, #02040a 100%);
-      background-attachment: fixed;
       color: var(--text);
+      background: radial-gradient(circle at top, #2a2e33 0%, var(--bg-a) 42%, #0f1113 100%);
     }
 
     .page {
-      max-width: 1320px;
+      max-width: 1280px;
       margin: 0 auto;
       padding: 24px;
-      display: flex;
-      gap: 24px;
-      align-items: flex-start;
-      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 20px;
     }
 
-    .board-panel,
-    .content-panel {
-      flex: 1;
-      min-width: 0;
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 18px;
-      box-shadow: 0 10px 24px rgba(31, 41, 55, 0.08);
-    }
-
-    .board-panel {
-      display: flex;
-      flex-direction: column;
-      background: transparent;
-      border: 0;
-      border-radius: 0;
-      box-shadow: none;
-      padding: 0;
-    }
-
-    .board-wrap {
-      width: min(72vw, 820px);
-      max-width: 100%;
-      margin: 0 auto;
-    }
-
-    #board {
-      width: 100%;
-      aspect-ratio: 1 / 1;
-    }
-
+    .hero,
     .menu-panel {
-      width: 280px;
       background: var(--panel);
-      border: 0;
+      border: 1px solid var(--line);
       border-radius: 14px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
       padding: 20px;
-      box-shadow: 0 10px 24px rgba(31, 41, 55, 0.08);
     }
 
-    .menu-title {
-      margin: 0 0 16px;
-      font-size: 1.2rem;
-      font-weight: 700;
+    .hero-headline { margin: 0; font-size: clamp(1.4rem, 2.8vw, 2rem); }
+    .hero-sub { margin: 8px 0 16px; color: var(--muted); }
+
+    .board-placeholder {
+      width: min(100%, 820px);
+      aspect-ratio: 1 / 1;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid #000;
+      margin: 0 auto;
+      background:
+        conic-gradient(var(--dark) 0 25%, var(--light) 0 50%, var(--dark) 0 75%, var(--light) 0)
+        0 0 / 25% 25%;
     }
 
-    .menu-links {
+    .pieces-layer { position: absolute; inset: 0; }
+
+    .checkmate-overlay {
+      position: absolute;
+      inset: 0;
       display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .menu-link,
-    .primary-btn {
-      display: inline-flex;
-      justify-content: center;
       align-items: center;
-      width: 100%;
-      min-height: 46px;
-      padding: 10px 14px;
-      border-radius: 10px;
-      border: 1px solid transparent;
-      background: var(--accent);
+      justify-content: center;
+      background: rgba(7, 12, 24, 0.68);
       color: #fff;
-      text-decoration: none;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background-color 0.15s ease;
+      font-size: clamp(1.8rem, 5vw, 3.4rem);
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0;
+      pointer-events: none;
+      animation: checkmate-overlay 8s infinite;
+      z-index: 6;
     }
 
-    .menu-link:hover,
-    .primary-btn:hover {
-      background: var(--accent-hover);
-    }
-
-    .secondary-link {
-      background: #fff;
-      color: var(--accent);
-      border-color: var(--accent);
-    }
-
-    .secondary-link:hover {
-      background: #eef5ff;
-    }
-
-    .menu-image-link {
-      display: block;
-      width: 100%;
-      text-decoration: none;
-    }
-
-    .menu-field-image {
-      display: block;
-      width: 100%;
-      height: auto;
-      max-height: calc(100vh - 180px);
-      margin: 0 auto 18px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      box-shadow: 0 10px 24px rgba(31, 41, 55, 0.14);
+    .piece {
+      position: absolute;
+      width: 10.5%;
+      height: 10.5%;
       object-fit: contain;
+      user-select: none;
+      -webkit-user-drag: none;
+      pointer-events: none;
+      transform: translate(9.5%, 9.5%);
     }
 
-    .white-1e1d7 {
-      background-color: var(--white-square) !important;
+    .piece.pawn { width: 9.5%; height: 9.5%; transform: translate(15%, 15%); }
+    .piece.moving { z-index: 3; }
+    .piece-wp-e2 { left: 50%; top: 75%; animation: wp-e2-e4 8s infinite; }
+    .piece-bp-e7 { left: 50%; top: 12.5%; animation: bp-e7-e5 8s infinite; }
+    .piece-wq-d1 { left: 37.5%; top: 87.5%; animation: wq-checkmate 8s infinite; z-index: 2; }
+    .piece-bn-b8 { left: 12.5%; top: 0; animation: bn-b8-c6 8s infinite; }
+    .piece-wb-f1 { left: 62.5%; top: 87.5%; animation: wb-f1-c4 8s infinite; }
+    .piece-bn-g8 { left: 75%; top: 0; animation: bn-g8-f6 8s infinite; }
+    .piece-bp-f7 { left: 62.5%; top: 12.5%; animation: bp-f7-captured 8s infinite; }
+
+    @keyframes wp-e2-e4 { 0%, 9% { left: 50%; top: 75%; } 16%, 100% { left: 50%; top: 50%; } }
+    @keyframes bp-e7-e5 { 0%, 20% { left: 50%; top: 12.5%; } 27%, 100% { left: 50%; top: 37.5%; } }
+    @keyframes wq-checkmate { 0%, 32% { left: 37.5%; top: 87.5%; } 40%, 76% { left: 87.5%; top: 37.5%; } 82%, 100% { left: 62.5%; top: 12.5%; } }
+    @keyframes bn-b8-c6 { 0%, 44% { left: 12.5%; top: 0; } 52%, 100% { left: 25%; top: 25%; } }
+    @keyframes wb-f1-c4 { 0%, 56% { left: 62.5%; top: 87.5%; } 64%, 100% { left: 25%; top: 50%; } }
+    @keyframes bn-g8-f6 { 0%, 68% { left: 75%; top: 0; } 76%, 100% { left: 62.5%; top: 25%; } }
+    @keyframes bp-f7-captured { 0%, 81% { opacity: 1; } 82%, 100% { opacity: 0; } }
+    @keyframes checkmate-overlay { 0%, 80% { opacity: 0; } 82%, 97% { opacity: 1; } 100% { opacity: 0; } }
+
+    .menu-title { margin: 0 0 12px; }
+    .menu-links { display: grid; gap: 9px; }
+    .menu-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 700;
+      background: var(--accent);
+      color: #111;
     }
 
-    .black-3c85d {
-      background-color: var(--black-square) !important;
-    }
+    .menu-link:hover { background: var(--accent-hover); }
 
-    #board img[class*="dragging"] {
-      opacity: 1 !important;
-    }
-
-    @media (max-width: 900px) {
-      .page {
-        flex-direction: column;
-      }
-
-      .menu-panel {
-        width: 100%;
-      }
-
-      .board-wrap {
-        width: min(95vw, 620px);
-      }
-
-      .menu-field-image {
-        width: 100%;
-      }
-    }
+    @media (max-width: 980px) { .page { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
-  <!-- - Main page wrapper for board and side menu. -->
   <main class="page">
-    <!-- - Left section with preview image and playable board. -->
-    <section class="board-panel" aria-label="Schachbrett Bereich">
-      <!-- - Clickable image that links to the PVP page. -->
-      <a class="menu-image-link" href="duo.html" aria-label="Gegen eine andere Person spielen">
-        <img class="menu-field-image" src="chess_board.jpg" alt="Schachbrett Bild - Klicke für PVP">
-      </a>
-      <!-- - Container used by chessboard.js to render the board. -->
-      <div class="board-wrap">
-        <div id="board"></div>
+    <section class="hero" aria-label="Schachbrett Bereich">
+      <h1 class="hero-headline">Willkommen bei Chess Frontend</h1>
+      <p class="hero-sub">Kurze Checkmate-Vorschau im Chess-Style.</p>
+
+      <div class="board-placeholder" aria-label="Animiertes Schachbrett">
+        <div class="pieces-layer">
+          <img class="piece moving pawn piece-wp-e2" src="chess_pieces/wp.png" alt="White pawn e2">
+          <img class="piece moving pawn piece-bp-e7" src="chess_pieces/bp.png" alt="Black pawn e7">
+          <img class="piece moving piece-wq-d1" src="chess_pieces/wq.png" alt="White queen">
+          <img class="piece moving piece-bn-b8" src="chess_pieces/bn.png" alt="Black knight b8">
+          <img class="piece moving piece-wb-f1" src="chess_pieces/wb.png" alt="White bishop f1">
+          <img class="piece moving piece-bn-g8" src="chess_pieces/bn.png" alt="Black knight g8">
+          <img class="piece moving pawn piece-bp-f7" src="chess_pieces/bp.png" alt="Black pawn f7">
+
+          <img class="piece" src="chess_pieces/wr.png" alt="White rook a1" style="left: 0; top: 87.5%;">
+          <img class="piece" src="chess_pieces/wn.png" alt="White knight b1" style="left: 12.5%; top: 87.5%;">
+          <img class="piece" src="chess_pieces/wb.png" alt="White bishop c1" style="left: 25%; top: 87.5%;">
+          <img class="piece" src="chess_pieces/wn.png" alt="White knight g1" style="left: 75%; top: 87.5%;">
+          <img class="piece" src="chess_pieces/wr.png" alt="White rook h1" style="left: 87.5%; top: 87.5%;">
+
+          <img class="piece pawn" src="chess_pieces/wp.png" alt="White pawn a2" style="left: 0; top: 75%;">
+          <img class="piece pawn" src="chess_pieces/wp.png" alt="White pawn b2" style="left: 12.5%; top: 75%;">
+          <img class="piece pawn" src="chess_pieces/wp.png" alt="White pawn c2" style="left: 25%; top: 75%;">
+          <img class="piece pawn" src="chess_pieces/wp.png" alt="White pawn d2" style="left: 37.5%; top: 75%;">
+          <img class="piece pawn" src="chess_pieces/wp.png" alt="White pawn f2" style="left: 62.5%; top: 75%;">
+          <img class="piece pawn" src="chess_pieces/wp.png" alt="White pawn g2" style="left: 75%; top: 75%;">
+          <img class="piece pawn" src="chess_pieces/wp.png" alt="White pawn h2" style="left: 87.5%; top: 75%;">
+
+          <img class="piece" src="chess_pieces/br.png" alt="Black rook a8" style="left: 0; top: 0;">
+          <img class="piece" src="chess_pieces/bb.png" alt="Black bishop c8" style="left: 25%; top: 0;">
+          <img class="piece" src="chess_pieces/bq.png" alt="Black queen d8" style="left: 37.5%; top: 0;">
+          <img class="piece" src="chess_pieces/bb.png" alt="Black bishop f8" style="left: 62.5%; top: 0;">
+          <img class="piece" src="chess_pieces/br.png" alt="Black rook h8" style="left: 87.5%; top: 0;">
+
+          <img class="piece pawn" src="chess_pieces/bp.png" alt="Black pawn a7" style="left: 0; top: 12.5%;">
+          <img class="piece pawn" src="chess_pieces/bp.png" alt="Black pawn b7" style="left: 12.5%; top: 12.5%;">
+          <img class="piece pawn" src="chess_pieces/bp.png" alt="Black pawn c7" style="left: 25%; top: 12.5%;">
+          <img class="piece pawn" src="chess_pieces/bp.png" alt="Black pawn d7" style="left: 37.5%; top: 12.5%;">
+          <img class="piece pawn" src="chess_pieces/bp.png" alt="Black pawn g7" style="left: 75%; top: 12.5%;">
+          <img class="piece pawn" src="chess_pieces/bp.png" alt="Black pawn h7" style="left: 87.5%; top: 12.5%;">
+
+          <img class="piece" src="chess_pieces/wk.png" alt="White king e1" style="left: 50%; top: 87.5%;">
+          <img class="piece" src="chess_pieces/bk.png" alt="Black king e8" style="left: 50%; top: 0;">
+        </div>
+        <div class="checkmate-overlay" aria-hidden="true">Checkmate</div>
       </div>
     </section>
 
-    <!-- - Right section with quick navigation links. -->
     <aside class="menu-panel" aria-label="Hauptnavigation">
       <h2 class="menu-title">Menü</h2>
-      <!-- - Main navigation for all pages. -->
       <nav class="menu-links">
         <a class="menu-link" href="index.html">Hauptmenu</a>
         <a class="menu-link" href="bot.html">Gegen Bot</a>
         <a class="menu-link" href="duo.html">PVP</a>
+        <a class="menu-link" href="host.html">Spiel hosten</a>
+        <a class="menu-link" href="join.html">Spiel beitreten</a>
       </nav>
     </aside>
   </main>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.13.4/chess.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard.js/1.0.0/chessboard-1.0.0.min.js"></script>
-  <script>
-    // - Create the chess rules engine.
-    // - Store if the user already started the game.
-    const game = new Chess();
-    let hasStarted = false;
-
-    // - Build the visual board.
-    // - Connect drag/drop callbacks to our logic below.
-    const board = Chessboard("board", {
-      draggable: true,
-      dropOffBoard: "snapback",
-      position: "empty",
-      pieceTheme: "https://cdnjs.cloudflare.com/ajax/libs/chessboard.js/1.0.0/img/chesspieces/wikipedia/{piece}.png",
-      onDragStart,
-      onDrop,
-      onSnapEnd
-    });
-
-    const boardEl = document.getElementById("board");
-
-    // - Start game on first board click.
-    // - Ignore clicks outside board squares.
-    boardEl.addEventListener("click", (event) => {
-      if (hasStarted) return;
-      const clickedSquare = event.target.closest(".square-55d63");
-      if (!clickedSquare) return;
-      startGame();
-    });
-
-    // - Keep board size responsive when window size changes.
-    window.addEventListener("resize", () => board.resize());
-
-    function startGame() {
-      // - Mark game as started.
-      // - Reset to initial position.
-      hasStarted = true;
-      game.reset();
-      board.position(game.fen());
-    }
-
-    function onDragStart(source, piece) {
-      // - Block moves before game start.
-      // - Block moves after game is over.
-      if (!hasStarted) return false;
-      if (game.game_over()) return false;
-
-      // - Allow only the side whose turn it is.
-      const turn = game.turn();
-      if ((turn === "w" && piece.startsWith("b")) || (turn === "b" && piece.startsWith("w"))) {
-        return false;
-      }
-
-      return true;
-    }
-
-    function onDrop(source, target) {
-      // - If game not started, snap piece back.
-      if (!hasStarted) return "snapback";
-
-      // - Try to make the move in chess.js.
-      // - Promote to queen by default.
-      const move = game.move({
-        from: source,
-        to: target,
-        promotion: "q"
-      });
-
-      // - Illegal move: return piece to source square.
-      if (move === null) {
-        return "snapback";
-      }
-
-      return undefined;
-    }
-
-    function onSnapEnd() {
-      // - Sync visual board with current game state.
-      if (!hasStarted) return;
-      board.position(game.fen());
-    }
-
-  </script>
 </body>
 </html>
 

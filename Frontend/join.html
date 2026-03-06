@@ -6,121 +6,100 @@
   <title>Chess Frontend - Spiel beitreten</title>
   <style>
     :root {
-      --bg: #f0d9b5;
-      --panel: #ffffff;
-      --text: #1f2937;
-      --accent: #1f5ea8;
-      --accent-hover: #184a84;
-      --border: #dbe3ef;
+      --bg-a: #121416;
+      --panel: #262421;
+      --line: #3d3a35;
+      --text: #f0f0f0;
+      --muted: #b7b7b7;
+      --accent: #3a7bd5;
+      --accent-hover: #2f66b1;
     }
 
     * { box-sizing: border-box; }
-
     body {
       margin: 0;
       min-height: 100vh;
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(145deg, #081a3a 0%, #02040a 100%);
-      background-attachment: fixed;
       color: var(--text);
+      background: radial-gradient(circle at top, #2a2e33 0%, var(--bg-a) 42%, #0f1113 100%);
     }
 
     .page {
-      max-width: 1320px;
+      max-width: 1200px;
       margin: 0 auto;
       padding: 24px;
-      display: flex;
-      gap: 24px;
-      align-items: flex-start;
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 20px;
     }
 
-    .content-panel {
-      flex: 1;
-      min-width: 0;
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 24px;
-      box-shadow: 0 10px 24px rgba(31, 41, 55, 0.08);
-    }
-
+    .content-panel,
     .menu-panel {
-      width: 280px;
       background: var(--panel);
-      border: 1px solid var(--border);
+      border: 1px solid var(--line);
       border-radius: 14px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
       padding: 20px;
-      box-shadow: 0 10px 24px rgba(31, 41, 55, 0.08);
     }
 
-    .menu-title {
-      margin: 0 0 16px;
-      font-size: 1.2rem;
-      font-weight: 700;
+    h1 { margin: 0; }
+    p { margin: 8px 0 16px; color: var(--muted); }
+    .stack { display: grid; gap: 10px; max-width: 360px; }
+
+    input {
+      min-height: 42px;
+      border: 1px solid #555;
+      border-radius: 10px;
+      padding: 0 12px;
+      background: #1b1b1b;
+      color: #f0f0f0;
     }
 
-    .menu-links {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .menu-link, .primary-btn {
+    .btn {
       display: inline-flex;
       justify-content: center;
       align-items: center;
-      width: 100%;
-      min-height: 46px;
-      padding: 10px 14px;
+      min-height: 42px;
       border-radius: 10px;
-      border: 1px solid transparent;
-      background: var(--accent);
-      color: #fff;
       text-decoration: none;
-      font-weight: 600;
+      font-weight: 700;
+      background: var(--accent);
+      color: #111;
+      padding: 0 14px;
+      border: 0;
       cursor: pointer;
-      transition: background-color 0.15s ease;
     }
 
-    .menu-link:hover, .primary-btn:hover { background: var(--accent-hover); }
+    .btn:hover { background: var(--accent-hover); }
+    .btn.secondary { background: transparent; color: #d6d6d6; border: 1px solid #5a5a5a; }
+    .btn.secondary:hover { background: #3a3a3a; }
 
-    .stack {
-      display: grid;
-      gap: 12px;
-      max-width: 340px;
-    }
+    .menu-title { margin: 0 0 12px; }
+    .menu-links { display: grid; gap: 9px; }
 
-    input {
-      min-height: 46px;
-      border: 1px solid #b7c5d8;
-      border-radius: 10px;
-      padding: 0 12px;
-      font-size: 1rem;
-    }
-
-    @media (max-width: 900px) {
-      .page { flex-direction: column; }
-      .menu-panel { width: 100%; }
-    }
+    @media (max-width: 980px) { .page { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
   <main class="page">
     <section class="content-panel">
       <h1>Spiel beitreten</h1>
+      <p>Gib den Code ein, um der Session beizutreten.</p>
       <div class="stack">
         <input type="text" placeholder="Game-Code" aria-label="Game-Code">
-        <button class="primary-btn" type="button">Beitreten</button>
-        <a class="primary-btn" href="index.html">Zurück</a>
+        <button class="btn" type="button">Beitreten</button>
+        <a class="btn secondary" href="index.html">Zurück</a>
       </div>
     </section>
 
     <aside class="menu-panel" aria-label="Hauptnavigation">
       <h2 class="menu-title">Menü</h2>
       <nav class="menu-links">
-        <a class="menu-link" href="index.html">Hauptmenu</a>
-        <a class="menu-link" href="bot.html">Gegen Bot</a>
-        <a class="menu-link" href="duo.html">PVP</a>
+        <a class="btn" href="index.html">Hauptmenu</a>
+        <a class="btn" href="bot.html">Gegen Bot</a>
+        <a class="btn" href="duo.html">PVP</a>
+        <a class="btn" href="host.html">Spiel hosten</a>
+        <a class="btn" href="join.html">Spiel beitreten</a>
       </nav>
     </aside>
   </main>

@@ -3,17 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chess Frontend - Gegen einen Bot</title>
+  <title>Chess Frontend - Gegen Bot</title>
   <style>
     :root {
-      --bg: #f0d9b5;
-      --panel: #ffffff;
-      --text: #1f2937;
-      --accent: #1f5ea8;
-      --accent-hover: #184a84;
-      --border: #dbe3ef;
-      --white-square: #f0d9b5;
-      --black-square: #274b7a;
+      --bg-a: #121416;
+      --bg-b: #1a1d21;
+      --panel: #262421;
+      --panel-2: #302e2b;
+      --text: #f0f0f0;
+      --muted: #b7b7b7;
+      --accent: #3a7bd5;
+      --accent-hover: #2f66b1;
+      --line: #3d3a35;
+      --light: #e8eef8;
+      --dark: #4a6fa5;
+      --danger: #e15b64;
     }
 
     * { box-sizing: border-box; }
@@ -22,95 +26,65 @@
       margin: 0;
       min-height: 100vh;
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(145deg, #081a3a 0%, #02040a 100%);
-      background-attachment: fixed;
       color: var(--text);
+      background: radial-gradient(circle at top, #2a2e33 0%, var(--bg-a) 42%, #0f1113 100%);
     }
 
     .page {
       max-width: 1320px;
       margin: 0 auto;
       padding: 24px;
-      display: flex;
-      gap: 24px;
-      align-items: flex-start;
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 20px;
     }
 
-    .content-panel {
-      flex: 1;
-      min-width: 0;
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 24px;
-      box-shadow: 0 10px 24px rgba(31, 41, 55, 0.08);
-    }
-
+    .content-panel,
     .menu-panel {
-      width: 280px;
       background: var(--panel);
-      border: 1px solid var(--border);
+      border: 1px solid var(--line);
       border-radius: 14px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
       padding: 20px;
-      box-shadow: 0 10px 24px rgba(31, 41, 55, 0.08);
     }
 
-    .menu-title {
-      margin: 0 0 16px;
-      font-size: 1.2rem;
-      font-weight: 700;
-    }
+    .panel-head h1 { margin: 0; font-size: clamp(1.35rem, 2.5vw, 1.9rem); }
+    .panel-head p { margin: 6px 0 0; color: var(--muted); }
 
-    .menu-links {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .menu-link, .primary-btn {
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-      width: 100%;
-      min-height: 46px;
-      padding: 10px 14px;
-      border-radius: 10px;
-      border: 1px solid transparent;
-      background: var(--accent);
-      color: #fff;
-      text-decoration: none;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background-color 0.15s ease;
-    }
-
-    .menu-link:hover, .primary-btn:hover { background: var(--accent-hover); }
-
-    .board-placeholder {
+    .board-shell {
+      margin-top: 16px;
+      position: relative;
       width: min(100%, 760px);
       aspect-ratio: 1 / 1;
-      margin: 18px 0;
-      border-radius: 12px;
-      border: 1px solid var(--border);
+      border: 1px solid #000;
       overflow: hidden;
-      box-shadow: 0 10px 24px rgba(31, 41, 55, 0.2);
+      background: #111;
+    }
+
+    .board-placeholder {
+      width: 100%;
+      height: 100%;
       display: grid;
       grid-template-columns: repeat(8, 1fr);
       grid-template-rows: repeat(8, 1fr);
     }
 
-    .board-square {
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .board-square { position: relative; display: flex; align-items: center; justify-content: center; }
+    .board-square.light { background: var(--light); }
+    .board-square.dark { background: var(--dark); }
+
+    .board-square.selected {
+      box-shadow: inset 0 0 0 3px rgba(58, 123, 213, 0.95);
     }
 
-    .board-square.light {
-      background: var(--white-square);
-    }
-
-    .board-square.dark {
-      background: var(--black-square);
+    .board-square.hint::after {
+      content: "";
+      width: 24%;
+      height: 24%;
+      border-radius: 999px;
+      background: rgba(21, 29, 42, 0.36);
+      position: absolute;
+      pointer-events: none;
     }
 
     .board-piece {
@@ -121,41 +95,162 @@
       cursor: grab;
     }
 
-    @media (max-width: 900px) {
-      .page { flex-direction: column; }
-      .menu-panel { width: 100%; }
+    .checkmate-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(10, 10, 10, 0.74);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 8px;
+      text-align: center;
+      z-index: 4;
+      padding: 16px;
+    }
+
+    .checkmate-overlay.show { display: flex; }
+    .checkmate-title { margin: 0; font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 800; }
+    .checkmate-sub { margin: 0; color: #dadada; }
+
+    .controls {
+      margin-top: 12px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn,
+    .menu-link {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 42px;
+      padding: 0 14px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      text-decoration: none;
+      font-weight: 700;
+      cursor: pointer;
+      background: var(--accent);
+      color: #111;
+      transition: background-color 0.18s ease;
+    }
+
+    .btn:hover,
+    .menu-link:hover { background: var(--accent-hover); }
+
+    .btn.secondary {
+      background: transparent;
+      color: #d6d6d6;
+      border-color: #5a5a5a;
+    }
+
+    .btn.secondary:hover { background: #3a3a3a; }
+
+    .logger {
+      margin-top: 14px;
+      width: min(100%, 760px);
+      background: var(--panel-2);
+      border: 1px solid #47433d;
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .logger-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .logger-title { margin: 0; font-size: 1rem; }
+
+    .status {
+      margin: 0;
+      font-size: 0.88rem;
+      border: 1px solid #5a5a5a;
+      border-radius: 999px;
+      padding: 3px 8px;
+      color: var(--muted);
+      background: #262421;
+    }
+
+    .move-log {
+      margin: 0;
+      padding-left: 18px;
+      max-height: 240px;
+      overflow: auto;
+      display: grid;
+      gap: 5px;
+      font-size: 0.92rem;
+      color: #e4e4e4;
+    }
+
+    .menu-title { margin: 0 0 12px; }
+    .menu-links { display: grid; gap: 9px; }
+
+    @media (max-width: 980px) {
+      .page { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
-  <!-- - Main page wrapper for content and side menu. -->
   <main class="page">
-    <!-- - Main content area with headline and board placeholder. -->
     <section class="content-panel">
-      <h1>Gegen einen Bot</h1>
-      <p>Spiele gegen den Computer - bald verfügbar!</p>
-      <!-- - Placeholder board where pieces are rendered by JavaScript. -->
-      <div id="bot-board" class="board-placeholder" aria-label="Schachbrett Platzhalter"></div>
-      <!-- - Button to return to home page. -->
-      <a class="primary-btn" href="index.html">Zurück</a>
+      <div class="panel-head">
+        <h1>Gegen Bot</h1>
+        <p>Lokales Drag-and-drop Spiel mit Move-Logger und Checkmate-Screen.</p>
+      </div>
+
+      <div class="board-shell">
+        <div id="bot-board" class="board-placeholder" aria-label="Schachbrett"></div>
+        <div id="checkmate-overlay" class="checkmate-overlay" role="status" aria-live="polite">
+          <p class="checkmate-title">Checkmate</p>
+          <p id="checkmate-text" class="checkmate-sub">Spiel beendet</p>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="reset-btn" class="btn" type="button">Neues Spiel</button>
+        <a class="btn secondary" href="index.html">Zurück</a>
+      </div>
+
+      <section class="logger" aria-label="Zugprotokoll">
+        <div class="logger-head">
+          <h2 class="logger-title">Move Logger</h2>
+          <p id="status" class="status">Läuft</p>
+        </div>
+        <ol id="move-log" class="move-log"></ol>
+      </section>
     </section>
 
-    <!-- - Side menu with quick links. -->
     <aside class="menu-panel" aria-label="Hauptnavigation">
       <h2 class="menu-title">Menü</h2>
-      <!-- - Main navigation for all pages. -->
       <nav class="menu-links">
         <a class="menu-link" href="index.html">Hauptmenu</a>
         <a class="menu-link" href="bot.html">Gegen Bot</a>
         <a class="menu-link" href="duo.html">PVP</a>
+        <a class="menu-link" href="host.html">Spiel hosten</a>
+        <a class="menu-link" href="join.html">Spiel beitreten</a>
       </nav>
     </aside>
   </main>
 
   <script>
-    // - Get board container from the page.
-    // - Define helper data for files and starting setup.
     const boardElement = document.getElementById("bot-board");
+    const overlay = document.getElementById("checkmate-overlay");
+    const checkmateText = document.getElementById("checkmate-text");
+    const moveLog = document.getElementById("move-log");
+    const statusEl = document.getElementById("status");
+    const resetBtn = document.getElementById("reset-btn");
+
+    const captureSound = new Audio("Chess_sounds/capture.mp3");
+    const queenCaptureSound = new Audio("Chess_sounds/queen_capture.mp3");
+    captureSound.preload = "auto";
+    queenCaptureSound.preload = "auto";
+
     const files = ["a", "b", "c", "d", "e", "f", "g", "h"];
     const initialPosition = {
       a8: "br", b8: "bn", c8: "bb", d8: "bq", e8: "bk", f8: "bb", g8: "bn", h8: "br",
@@ -164,77 +259,342 @@
       a1: "wr", b1: "wn", c1: "wb", d1: "wq", e1: "wk", f1: "wb", g1: "wn", h1: "wr"
     };
 
-    // - Store the currently dragged piece between events.
     let draggedPiece = null;
+    let draggedFrom = "";
+    let selectedSquare = "";
+    let selectedMoves = [];
+    let plyCount = 0;
+    let gameOver = false;
+    const boardSquares = new Map();
 
-    // - Build all 64 squares.
-    // - Add drag/drop handlers to each square.
-    for (let rank = 8; rank >= 1; rank--) {
-      for (let fileIndex = 0; fileIndex < 8; fileIndex++) {
-        const square = document.createElement("div");
-        const file = files[fileIndex];
-        const squareName = file + rank;
-        const isDark = (rank + fileIndex) % 2 === 0;
-        square.className = "board-square " + (isDark ? "dark" : "light");
-        square.dataset.square = squareName;
+    function playCaptureSound(pieceCode) {
+      const sound = pieceCode && pieceCode.endsWith("q") ? queenCaptureSound : captureSound;
+      sound.cloneNode().play().catch(() => {});
+    }
 
-        square.addEventListener("dragover", (event) => {
-          event.preventDefault();
-        });
+    function parseSquare(squareName) {
+      return {
+        file: files.indexOf(squareName[0]),
+        rank: Number(squareName[1])
+      };
+    }
 
-        square.addEventListener("drop", (event) => {
-          event.preventDefault();
-          if (!draggedPiece) return;
+    function toSquare(file, rank) {
+      return files[file] + String(rank);
+    }
 
-          // - If target square has another piece, remove it.
-          const occupyingPiece = square.querySelector(".board-piece");
-          if (occupyingPiece && occupyingPiece !== draggedPiece) {
-            occupyingPiece.remove();
+    function isInside(file, rank) {
+      return file >= 0 && file < 8 && rank >= 1 && rank <= 8;
+    }
+
+    function getPieceOnSquare(squareName) {
+      const squareEl = boardSquares.get(squareName);
+      if (!squareEl) return null;
+      return squareEl.querySelector(".board-piece");
+    }
+
+    function clearSelection() {
+      if (selectedSquare && boardSquares.get(selectedSquare)) {
+        boardSquares.get(selectedSquare).classList.remove("selected");
+      }
+      selectedMoves.forEach((sq) => {
+        const el = boardSquares.get(sq);
+        if (el) el.classList.remove("hint");
+      });
+      selectedSquare = "";
+      selectedMoves = [];
+    }
+
+    function markSelection(squareName, moves) {
+      clearSelection();
+      selectedSquare = squareName;
+      selectedMoves = moves;
+      const fromEl = boardSquares.get(squareName);
+      if (fromEl) fromEl.classList.add("selected");
+      moves.forEach((sq) => {
+        const el = boardSquares.get(sq);
+        if (el) el.classList.add("hint");
+      });
+    }
+
+    function collectSlidingMoves(fromSquare, color, directions) {
+      const moves = [];
+      const from = parseSquare(fromSquare);
+
+      directions.forEach(([df, dr]) => {
+        let file = from.file + df;
+        let rank = from.rank + dr;
+        while (isInside(file, rank)) {
+          const target = toSquare(file, rank);
+          const targetPiece = getPieceOnSquare(target);
+          if (!targetPiece) {
+            moves.push(target);
+          } else {
+            if (!targetPiece.alt.startsWith(color)) moves.push(target);
+            break;
           }
+          file += df;
+          rank += dr;
+        }
+      });
+      return moves;
+    }
 
-          // - Move dragged piece to new square.
-          square.appendChild(draggedPiece);
-          draggedPiece = null;
-        });
+    function getLegalMoves(squareName, pieceCode) {
+      const color = pieceCode[0];
+      const kind = pieceCode[1];
+      const from = parseSquare(squareName);
+      const moves = [];
 
-        // - If this square has a start piece, render it.
-        const pieceCode = initialPosition[squareName];
-        if (pieceCode) {
-          const piece = document.createElement("img");
-          piece.className = "board-piece";
-          piece.src = "chess_pieces/" + pieceCode + ".png";
-          piece.alt = pieceCode;
-          piece.draggable = true;
-
-          piece.addEventListener("dragstart", (event) => {
-            // - Save the dragged piece.
-            // - Use a canvas ghost with same visual size.
-            draggedPiece = piece;
-            event.dataTransfer.effectAllowed = "move";
-            event.dataTransfer.setData("text/plain", piece.alt);
-            const rect = piece.getBoundingClientRect();
-            const dragSize = Math.max(1, Math.round(Math.min(rect.width, rect.height)));
-            const dragCanvas = document.createElement("canvas");
-            dragCanvas.width = dragSize;
-            dragCanvas.height = dragSize;
-            const ctx = dragCanvas.getContext("2d");
-            if (ctx) {
-              ctx.drawImage(piece, 0, 0, dragSize, dragSize);
-              event.dataTransfer.setDragImage(dragCanvas, dragSize / 2, dragSize / 2);
+      if (kind === "p") {
+        const dir = color === "w" ? 1 : -1;
+        const startRank = color === "w" ? 2 : 7;
+        const oneStepRank = from.rank + dir;
+        if (isInside(from.file, oneStepRank)) {
+          const oneStepSq = toSquare(from.file, oneStepRank);
+          if (!getPieceOnSquare(oneStepSq)) {
+            moves.push(oneStepSq);
+            const twoStepRank = from.rank + dir * 2;
+            if (from.rank === startRank && isInside(from.file, twoStepRank)) {
+              const twoStepSq = toSquare(from.file, twoStepRank);
+              if (!getPieceOnSquare(twoStepSq)) moves.push(twoStepSq);
             }
-          });
-
-          piece.addEventListener("dragend", () => {
-            // - Clear drag state after drop/cancel.
-            draggedPiece = null;
-          });
-
-          square.appendChild(piece);
+          }
         }
 
-        boardElement.appendChild(square);
+        [-1, 1].forEach((df) => {
+          const capFile = from.file + df;
+          const capRank = from.rank + dir;
+          if (!isInside(capFile, capRank)) return;
+          const capSq = toSquare(capFile, capRank);
+          const targetPiece = getPieceOnSquare(capSq);
+          if (targetPiece && !targetPiece.alt.startsWith(color)) moves.push(capSq);
+        });
+      }
+
+      if (kind === "n") {
+        [[1,2],[2,1],[2,-1],[1,-2],[-1,-2],[-2,-1],[-2,1],[-1,2]].forEach(([df, dr]) => {
+          const file = from.file + df;
+          const rank = from.rank + dr;
+          if (!isInside(file, rank)) return;
+          const sq = toSquare(file, rank);
+          const targetPiece = getPieceOnSquare(sq);
+          if (!targetPiece || !targetPiece.alt.startsWith(color)) moves.push(sq);
+        });
+      }
+
+      if (kind === "b" || kind === "q") {
+        moves.push(...collectSlidingMoves(squareName, color, [[1,1],[1,-1],[-1,1],[-1,-1]]));
+      }
+
+      if (kind === "r" || kind === "q") {
+        moves.push(...collectSlidingMoves(squareName, color, [[1,0],[-1,0],[0,1],[0,-1]]));
+      }
+
+      if (kind === "k") {
+        for (let df = -1; df <= 1; df++) {
+          for (let dr = -1; dr <= 1; dr++) {
+            if (df === 0 && dr === 0) continue;
+            const file = from.file + df;
+            const rank = from.rank + dr;
+            if (!isInside(file, rank)) continue;
+            const sq = toSquare(file, rank);
+            const targetPiece = getPieceOnSquare(sq);
+            if (!targetPiece || !targetPiece.alt.startsWith(color)) moves.push(sq);
+          }
+        }
+      }
+
+      return moves;
+    }
+
+    function pieceLabel(code) { return code.toUpperCase(); }
+
+    function addMoveLog(pieceCode, fromSquare, toSquare, capturedPiece) {
+      plyCount += 1;
+      const item = document.createElement("li");
+      const capturePart = capturedPiece ? " x " + pieceLabel(capturedPiece) : "";
+      item.textContent = plyCount + ". " + pieceLabel(pieceCode) + " " + fromSquare + " -> " + toSquare + capturePart;
+      moveLog.appendChild(item);
+      moveLog.scrollTop = moveLog.scrollHeight;
+    }
+
+    function showCheckmate(winnerColor) {
+      gameOver = true;
+      statusEl.textContent = "Checkmate";
+      statusEl.style.color = "var(--danger)";
+      checkmateText.textContent = winnerColor + " gewinnt durch Matt.";
+      overlay.classList.add("show");
+    }
+
+    function clearGameUi() {
+      overlay.classList.remove("show");
+      moveLog.innerHTML = "";
+      plyCount = 0;
+      statusEl.textContent = "Läuft";
+      statusEl.style.color = "var(--muted)";
+      clearSelection();
+    }
+
+    function executeMove(fromSquare, toSquare, movingPiece) {
+      if (!movingPiece || gameOver) return false;
+      const legalMoves = getLegalMoves(fromSquare, movingPiece.alt);
+      if (!legalMoves.includes(toSquare)) return false;
+
+      const occupyingPiece = getPieceOnSquare(toSquare);
+      if (occupyingPiece && occupyingPiece.alt.startsWith(movingPiece.alt[0])) return false;
+
+      const movingCode = movingPiece.alt;
+      let capturedCode = "";
+      if (occupyingPiece && occupyingPiece !== movingPiece) {
+        capturedCode = occupyingPiece.alt;
+        playCaptureSound(capturedCode);
+        occupyingPiece.remove();
+      }
+
+      const targetSquare = boardSquares.get(toSquare);
+      if (!targetSquare) return false;
+      targetSquare.appendChild(movingPiece);
+      addMoveLog(movingCode, fromSquare, toSquare, capturedCode);
+
+      if (capturedCode === "wk" || capturedCode === "bk") {
+        const winnerColor = movingCode.startsWith("w") ? "Weiss" : "Schwarz";
+        showCheckmate(winnerColor);
+      }
+      return true;
+    }
+
+    function onPieceClick(piece) {
+      if (gameOver) return;
+      const clickedSquare = piece.parentElement ? piece.parentElement.dataset.square : "";
+      if (!clickedSquare) return;
+
+      if (selectedSquare && selectedSquare !== clickedSquare) {
+        const selectedPiece = getPieceOnSquare(selectedSquare);
+        const isOpponentPiece = selectedPiece && !piece.alt.startsWith(selectedPiece.alt[0]);
+        if (selectedPiece && isOpponentPiece && selectedMoves.includes(clickedSquare)) {
+          executeMove(selectedSquare, clickedSquare, selectedPiece);
+          clearSelection();
+          return;
+        }
+      }
+
+      if (selectedSquare === clickedSquare) {
+        clearSelection();
+        return;
+      }
+
+      const legalMoves = getLegalMoves(clickedSquare, piece.alt);
+      markSelection(clickedSquare, legalMoves);
+    }
+
+    function onSquareClick(squareName) {
+      if (gameOver || !selectedSquare) return;
+      const selectedPiece = getPieceOnSquare(selectedSquare);
+      if (!selectedPiece) {
+        clearSelection();
+        return;
+      }
+
+      const moved = executeMove(selectedSquare, squareName, selectedPiece);
+      clearSelection();
+      if (!moved) {
+        const pieceOnClicked = getPieceOnSquare(squareName);
+        if (pieceOnClicked) onPieceClick(pieceOnClicked);
       }
     }
+
+    function buildBoard() {
+      boardElement.innerHTML = "";
+      boardSquares.clear();
+      draggedPiece = null;
+      draggedFrom = "";
+      gameOver = false;
+      clearGameUi();
+
+      for (let rank = 8; rank >= 1; rank--) {
+        for (let fileIndex = 0; fileIndex < 8; fileIndex++) {
+          const square = document.createElement("div");
+          const file = files[fileIndex];
+          const squareName = file + rank;
+          const isDark = (rank + fileIndex) % 2 === 0;
+          square.className = "board-square " + (isDark ? "dark" : "light");
+          square.dataset.square = squareName;
+          boardSquares.set(squareName, square);
+
+          square.addEventListener("click", () => {
+            onSquareClick(squareName);
+          });
+
+          square.addEventListener("dragover", (event) => {
+            if (gameOver) return;
+            event.preventDefault();
+          });
+
+          square.addEventListener("drop", (event) => {
+            event.preventDefault();
+            if (!draggedPiece || gameOver) return;
+
+            const fromSquare = draggedFrom;
+            const toSquare = square.dataset.square;
+            if (!fromSquare || fromSquare === toSquare) {
+              draggedPiece = null;
+              draggedFrom = "";
+              clearSelection();
+              return;
+            }
+
+            executeMove(fromSquare, toSquare, draggedPiece);
+
+            draggedPiece = null;
+            draggedFrom = "";
+            clearSelection();
+          });
+
+          const pieceCode = initialPosition[squareName];
+          if (pieceCode) {
+            const piece = document.createElement("img");
+            piece.className = "board-piece";
+            piece.src = "chess_pieces/" + pieceCode + ".png";
+            piece.alt = pieceCode;
+            piece.draggable = true;
+
+            piece.addEventListener("dragstart", (event) => {
+              if (gameOver) {
+                event.preventDefault();
+                return;
+              }
+              draggedPiece = piece;
+              draggedFrom = piece.parentElement ? piece.parentElement.dataset.square : "";
+              if (draggedFrom) {
+                const legalMoves = getLegalMoves(draggedFrom, piece.alt);
+                markSelection(draggedFrom, legalMoves);
+              }
+              event.dataTransfer.effectAllowed = "move";
+              event.dataTransfer.setData("text/plain", pieceCode);
+            });
+
+            piece.addEventListener("dragend", () => {
+              draggedPiece = null;
+              draggedFrom = "";
+              clearSelection();
+            });
+
+            piece.addEventListener("click", (event) => {
+              event.stopPropagation();
+              onPieceClick(piece);
+            });
+
+            square.appendChild(piece);
+          }
+
+          boardElement.appendChild(square);
+        }
+      }
+    }
+
+    resetBtn.addEventListener("click", buildBoard);
+    buildBoard();
   </script>
 </body>
 </html>
