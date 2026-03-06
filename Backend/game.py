@@ -6,11 +6,15 @@ class Game:
     def __init__(self, mode, bot_level=None):
         self.board = chess.Board()
         self.mode = mode  # Spielt man gegen einen Bot oder PVP
-        self.bot_level = bot_level # Welches von den 3 Level wurde gewählt
+        self.bot_level = bot_level  # Welches von den 3 Level wurde gewaehlt
 
     def make_move(self, uci: str):
-        move = chess.Move.from_uci(uci)         #UCI = Schachsprache
-        #Prüfung ob der Move Legal ist
+        try:
+            move = chess.Move.from_uci(uci)  # UCI = Schachsprache
+        except ValueError:
+            return False
+
+        # Pruefung ob der Move legal ist
         if move in self.board.legal_moves:
             self.board.push(move)
             return True
@@ -18,17 +22,20 @@ class Game:
 
     def get_state(self):
         return {
-            "fen": self.board.fen(),    #Fen = Darstellung einer 
+            "fen": self.board.fen(),  # FEN = Darstellung einer Brettstellung
             "turn": "white" if self.board.turn == chess.WHITE else "black",
             "game_over": self.board.is_game_over(),
-            "outcome": str(self.board.outcome()) if self.board.is_game_over() else None
+            "outcome": str(self.board.outcome()) if self.board.is_game_over() else None,
         }
+
+    def reset(self):
+        self.board = chess.Board()
 
     def bot_move(self):
         pass
 
 
-#Main Game
+# Main Game
 if __name__ == "__main__":
     game = Game(mode="pvp")
 
