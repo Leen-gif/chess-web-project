@@ -6,62 +6,69 @@
   <title>Chess Frontend - Hauptmenü</title>
   <style>
     :root {
-      --bg-a: #121416;
-      --bg-b: #1a1d21;
-      --panel: #262421;
-      --line: #3d3a35;
-      --text: #f0f0f0;
-      --muted: #b7b7b7;
-      --accent: #3a7bd5;
-      --accent-hover: #2f66b1;
-      --light: #e8eef8;
-      --dark: #4a6fa5;
+      --bg: #f0d9b5;
+      --panel: #ffffff;
+      --text: #1f2937;
+      --accent: #1f5ea8;
+      --accent-hover: #184a84;
+      --border: #dbe3ef;
+      --white-square: #f0d9b5;
+      --black-square: #274b7a;
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
       min-height: 100vh;
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(145deg, #081a3a 0%, #02040a 100%);
+      background-attachment: fixed;
       color: var(--text);
-      background: radial-gradient(circle at top, #2a2e33 0%, var(--bg-a) 42%, #0f1113 100%);
     }
 
     .page {
-      max-width: 1280px;
+      max-width: 1320px;
       margin: 0 auto;
       padding: 24px;
-      display: grid;
-      grid-template-columns: 1fr 280px;
-      gap: 20px;
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+      min-height: 100vh;
     }
 
-    .hero,
-    .menu-panel {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
-      padding: 20px;
+    .board-panel {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
-
-    .hero-headline { margin: 0; font-size: clamp(1.4rem, 2.8vw, 2rem); }
-    .hero-sub { margin: 8px 0 16px; color: var(--muted); }
 
     .board-placeholder {
-      width: min(100%, 820px);
+      width: min(72vw, 820px);
+      max-width: 100%;
       aspect-ratio: 1 / 1;
       position: relative;
+      border-radius: 0;
+      border: none;
       overflow: hidden;
-      border: 1px solid #000;
-      margin: 0 auto;
+      box-shadow: none;
       background:
-        conic-gradient(var(--dark) 0 25%, var(--light) 0 50%, var(--dark) 0 75%, var(--light) 0)
-        0 0 / 25% 25%;
+        conic-gradient(
+          var(--black-square) 0 25%,
+          var(--white-square) 0 50%,
+          var(--black-square) 0 75%,
+          var(--white-square) 0
+        ) 0 0 / 25% 25%;
     }
 
-    .pieces-layer { position: absolute; inset: 0; }
+    .pieces-layer {
+      position: absolute;
+      inset: 0;
+    }
 
     .checkmate-overlay {
       position: absolute;
@@ -70,7 +77,7 @@
       align-items: center;
       justify-content: center;
       background: rgba(7, 12, 24, 0.68);
-      color: #fff;
+      color: #ffffff;
       font-size: clamp(1.8rem, 5vw, 3.4rem);
       font-weight: 800;
       letter-spacing: 0.08em;
@@ -92,50 +99,163 @@
       transform: translate(9.5%, 9.5%);
     }
 
-    .piece.pawn { width: 9.5%; height: 9.5%; transform: translate(15%, 15%); }
-    .piece.moving { z-index: 3; }
-    .piece-wp-e2 { left: 50%; top: 75%; animation: wp-e2-e4 8s infinite; }
-    .piece-bp-e7 { left: 50%; top: 12.5%; animation: bp-e7-e5 8s infinite; }
-    .piece-wq-d1 { left: 37.5%; top: 87.5%; animation: wq-checkmate 8s infinite; z-index: 2; }
-    .piece-bn-b8 { left: 12.5%; top: 0; animation: bn-b8-c6 8s infinite; }
-    .piece-wb-f1 { left: 62.5%; top: 87.5%; animation: wb-f1-c4 8s infinite; }
-    .piece-bn-g8 { left: 75%; top: 0; animation: bn-g8-f6 8s infinite; }
-    .piece-bp-f7 { left: 62.5%; top: 12.5%; animation: bp-f7-captured 8s infinite; }
-
-    @keyframes wp-e2-e4 { 0%, 9% { left: 50%; top: 75%; } 16%, 100% { left: 50%; top: 50%; } }
-    @keyframes bp-e7-e5 { 0%, 20% { left: 50%; top: 12.5%; } 27%, 100% { left: 50%; top: 37.5%; } }
-    @keyframes wq-checkmate { 0%, 32% { left: 37.5%; top: 87.5%; } 40%, 76% { left: 87.5%; top: 37.5%; } 82%, 100% { left: 62.5%; top: 12.5%; } }
-    @keyframes bn-b8-c6 { 0%, 44% { left: 12.5%; top: 0; } 52%, 100% { left: 25%; top: 25%; } }
-    @keyframes wb-f1-c4 { 0%, 56% { left: 62.5%; top: 87.5%; } 64%, 100% { left: 25%; top: 50%; } }
-    @keyframes bn-g8-f6 { 0%, 68% { left: 75%; top: 0; } 76%, 100% { left: 62.5%; top: 25%; } }
-    @keyframes bp-f7-captured { 0%, 81% { opacity: 1; } 82%, 100% { opacity: 0; } }
-    @keyframes checkmate-overlay { 0%, 80% { opacity: 0; } 82%, 97% { opacity: 1; } 100% { opacity: 0; } }
-
-    .menu-title { margin: 0 0 12px; }
-    .menu-links { display: grid; gap: 9px; }
-    .menu-link {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 42px;
-      border-radius: 10px;
-      text-decoration: none;
-      font-weight: 700;
-      background: var(--accent);
-      color: #111;
+    .piece.pawn {
+      width: 9.5%;
+      height: 9.5%;
+      transform: translate(15%, 15%);
     }
 
-    .menu-link:hover { background: var(--accent-hover); }
+    .piece.moving {
+      z-index: 3;
+    }
 
-    @media (max-width: 980px) { .page { grid-template-columns: 1fr; } }
+    .piece-wp-e2 {
+      left: 50%;
+      top: 75%;
+      animation: wp-e2-e4 8s infinite;
+    }
+
+    .piece-bp-e7 {
+      left: 50%;
+      top: 12.5%;
+      animation: bp-e7-e5 8s infinite;
+    }
+
+    .piece-wq-d1 {
+      left: 37.5%;
+      top: 87.5%;
+      animation: wq-checkmate 8s infinite;
+      z-index: 2;
+    }
+
+    .piece-bn-b8 {
+      left: 12.5%;
+      top: 0;
+      animation: bn-b8-c6 8s infinite;
+    }
+
+    .piece-wb-f1 {
+      left: 62.5%;
+      top: 87.5%;
+      animation: wb-f1-c4 8s infinite;
+    }
+
+    .piece-bn-g8 {
+      left: 75%;
+      top: 0;
+      animation: bn-g8-f6 8s infinite;
+    }
+
+    .piece-bp-f7 {
+      left: 62.5%;
+      top: 12.5%;
+      animation: bp-f7-captured 8s infinite;
+    }
+
+    @keyframes wp-e2-e4 {
+      0%, 9% { left: 50%; top: 75%; }
+      16%, 100% { left: 50%; top: 50%; }
+    }
+
+    @keyframes bp-e7-e5 {
+      0%, 20% { left: 50%; top: 12.5%; }
+      27%, 100% { left: 50%; top: 37.5%; }
+    }
+
+    @keyframes wq-checkmate {
+      0%, 32% { left: 37.5%; top: 87.5%; }
+      40%, 76% { left: 87.5%; top: 37.5%; }
+      82%, 100% { left: 62.5%; top: 12.5%; }
+    }
+
+    @keyframes bn-b8-c6 {
+      0%, 44% { left: 12.5%; top: 0; }
+      52%, 100% { left: 25%; top: 25%; }
+    }
+
+    @keyframes wb-f1-c4 {
+      0%, 56% { left: 62.5%; top: 87.5%; }
+      64%, 100% { left: 25%; top: 50%; }
+    }
+
+    @keyframes bn-g8-f6 {
+      0%, 68% { left: 75%; top: 0; }
+      76%, 100% { left: 62.5%; top: 25%; }
+    }
+
+    @keyframes bp-f7-captured {
+      0%, 81% { opacity: 1; }
+      82%, 100% { opacity: 0; }
+    }
+
+    @keyframes checkmate-overlay {
+      0%, 80% { opacity: 0; }
+      82%, 97% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    .menu-panel {
+      width: 280px;
+      background: var(--panel);
+      border: 0;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 10px 24px rgba(31, 41, 55, 0.08);
+    }
+
+    .menu-title {
+      margin: 0 0 16px;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .menu-links {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .menu-link,
+    .primary-btn {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      min-height: 46px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+    }
+
+    .menu-link:hover,
+    .primary-btn:hover {
+      background: var(--accent-hover);
+    }
+
+    @media (max-width: 900px) {
+      .page {
+        flex-direction: column;
+      }
+
+      .menu-panel {
+        width: 100%;
+      }
+
+      .board-placeholder {
+        width: min(95vw, 620px);
+      }
+    }
   </style>
 </head>
 <body>
   <main class="page">
-    <section class="hero" aria-label="Schachbrett Bereich">
-      <h1 class="hero-headline">Willkommen bei Chess Frontend</h1>
-      <p class="hero-sub">Kurze Checkmate-Vorschau im Chess-Style.</p>
-
+    <section class="board-panel" aria-label="Schachbrett Bereich">
       <div class="board-placeholder" aria-label="Animiertes Schachbrett">
         <div class="pieces-layer">
           <img class="piece moving pawn piece-wp-e2" src="chess_pieces/wp.png" alt="White pawn e2">
@@ -184,13 +304,85 @@
       <h2 class="menu-title">Menü</h2>
       <nav class="menu-links">
         <a class="menu-link" href="index.html">Hauptmenu</a>
-        <a class="menu-link" href="bot.html">Gegen Bot</a>
+        <a class="menu-link" href="bot_select.html">Gegen Bot</a>
         <a class="menu-link" href="duo.html">PVP</a>
-        <a class="menu-link" href="host.html">Spiel hosten</a>
-        <a class="menu-link" href="join.html">Spiel beitreten</a>
       </nav>
     </aside>
   </main>
+
+  <script>
+    const loopMs = 8000;
+    const captureAtMs = 6560;
+    const captureSound = new Audio("Chess_sounds/capture.mp3");
+    const animatedElements = document.querySelectorAll(".piece.moving, .checkmate-overlay");
+
+    captureSound.preload = "auto";
+
+    let soundTimerIds = [];
+    let soundLoopId = null;
+    let soundsEnabled = false;
+
+    function playSound(audio) {
+      audio.currentTime = 0;
+      audio.play().catch(() => {});
+    }
+
+    function primeAudio() {
+      captureSound.muted = true;
+      captureSound.currentTime = 0;
+      captureSound.play()
+        .then(() => {
+          captureSound.pause();
+          captureSound.currentTime = 0;
+          captureSound.muted = false;
+        })
+        .catch(() => {
+          captureSound.muted = false;
+        });
+    }
+
+    function clearSoundSchedule() {
+      soundTimerIds.forEach((id) => clearTimeout(id));
+      soundTimerIds = [];
+      if (soundLoopId) {
+        clearInterval(soundLoopId);
+        soundLoopId = null;
+      }
+    }
+
+    function restartAnimationLoop() {
+      animatedElements.forEach((element) => {
+        element.style.animation = "none";
+      });
+      void document.body.offsetHeight;
+      animatedElements.forEach((element) => {
+        element.style.animation = "";
+      });
+    }
+
+    function scheduleLoopSounds() {
+      clearSoundSchedule();
+      soundTimerIds.push(setTimeout(() => playSound(captureSound), captureAtMs));
+      soundLoopId = setInterval(() => playSound(captureSound), loopMs);
+    }
+
+    function enableSoundsOnce() {
+      if (soundsEnabled) return;
+      soundsEnabled = true;
+      primeAudio();
+      restartAnimationLoop();
+      scheduleLoopSounds();
+      document.removeEventListener("click", enableSoundsOnce);
+      document.removeEventListener("keydown", enableSoundsOnce);
+      document.removeEventListener("touchstart", enableSoundsOnce);
+    }
+
+    document.addEventListener("click", enableSoundsOnce);
+    document.addEventListener("keydown", enableSoundsOnce);
+    document.addEventListener("touchstart", enableSoundsOnce, { passive: true });
+  </script>
+
 </body>
 </html>
+
 

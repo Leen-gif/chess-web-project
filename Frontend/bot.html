@@ -50,6 +50,18 @@
 
     .panel-head h1 { margin: 0; font-size: clamp(1.35rem, 2.5vw, 1.9rem); }
     .panel-head p { margin: 6px 0 0; color: var(--muted); }
+    .difficulty-pill {
+      margin-top: 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid #4f4a44;
+      background: #211f1c;
+      font-size: 0.85rem;
+      color: #d9d9d9;
+    }
 
     .board-shell {
       margin-top: 16px;
@@ -202,6 +214,7 @@
       <div class="panel-head">
         <h1>Gegen Bot</h1>
         <p>Lokales Drag-and-drop Spiel mit Move-Logger und Checkmate-Screen.</p>
+        <div id="difficulty-pill" class="difficulty-pill" aria-live="polite"></div>
       </div>
 
       <div class="board-shell">
@@ -230,7 +243,7 @@
       <h2 class="menu-title">Menü</h2>
       <nav class="menu-links">
         <a class="menu-link" href="index.html">Hauptmenu</a>
-        <a class="menu-link" href="bot.html">Gegen Bot</a>
+        <a class="menu-link" href="bot_select.html">Gegen Bot</a>
         <a class="menu-link" href="duo.html">PVP</a>
         <a class="menu-link" href="host.html">Spiel hosten</a>
         <a class="menu-link" href="join.html">Spiel beitreten</a>
@@ -245,6 +258,54 @@
     const moveLog = document.getElementById("move-log");
     const statusEl = document.getElementById("status");
     const resetBtn = document.getElementById("reset-btn");
+    const difficultyPill = document.getElementById("difficulty-pill");
+
+    const difficultyProfiles = {
+      easy: {
+        label: "Einfach",
+        stockfishProfileId: "sf-easy",
+        options: { skill: 3, depth: 4 }
+      },
+      medium: {
+        label: "Mittel",
+        stockfishProfileId: "sf-medium",
+        options: { skill: 8, depth: 8 }
+      },
+      hard: {
+        label: "Schwer",
+        stockfishProfileId: "sf-hard",
+        options: { skill: 16, depth: 12 }
+      }
+    };
+
+    function persistDifficulty(key) {
+      const profile = difficultyProfiles[key];
+      if (!profile) return;
+      localStorage.setItem("botDifficulty", key);
+      localStorage.setItem("stockfishProfileId", profile.stockfishProfileId);
+      localStorage.setItem("stockfishOptions", JSON.stringify(profile.options));
+    }
+
+    function resolveDifficulty() {
+      const params = new URLSearchParams(window.location.search);
+      const fromQuery = params.get("difficulty");
+      if (fromQuery && difficultyProfiles[fromQuery]) {
+        persistDifficulty(fromQuery);
+        return fromQuery;
+      }
+
+      const stored = localStorage.getItem("botDifficulty");
+      if (stored && difficultyProfiles[stored]) return stored;
+
+      persistDifficulty("medium");
+      return "medium";
+    }
+
+    const activeDifficulty = resolveDifficulty();
+    const activeProfile = difficultyProfiles[activeDifficulty];
+    if (difficultyPill && activeProfile) {
+      difficultyPill.textContent = "Schwierigkeit: " + activeProfile.label;
+    }
 
     const captureSound = new Audio("Chess_sounds/capture.mp3");
     const queenCaptureSound = new Audio("Chess_sounds/queen_capture.mp3");
@@ -598,4 +659,5 @@
   </script>
 </body>
 </html>
+
 
