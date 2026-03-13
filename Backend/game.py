@@ -1,4 +1,25 @@
+from __future__ import annotations
+
+import shutil
+
 import chess
+import chess.engine
+
+
+BOT_LEVELS = {
+    "easy": {
+        "skill_level": 1,
+        "limit": chess.engine.Limit(depth=4),
+    },
+    "medium": {
+        "skill_level": 8,
+        "limit": chess.engine.Limit(depth=10),
+    },
+    "hard": {
+        "skill_level": 18,
+        "limit": chess.engine.Limit(depth=16),
+    },
+}
 
 
 class Game:
@@ -31,8 +52,29 @@ class Game:
     def reset(self):
         self.board = chess.Board()
 
-    def bot_move(self):
-        pass
+    def bot_move(self, engine_path: str | None = None):
+        if self.mode != "bot":
+            return None
+
+        if self.board.is_game_over():
+            return None
+
+        bot_profile = BOT_LEVELS.get(self.bot_level or "")
+        if bot_profile is None:
+            raise ValueError("invalid bot level")
+
+        resolved_engine_path = engine_path or shutil.which("stockfish")
+        if not resolved_engine_path:
+            raise RuntimeError(
+                "Stockfish engine not found. Set STOCKFISH_PATH or install stockfish in PATH."
+            )
+
+        with chess.engine.SimpleEngine.popen_uci(resolved_engine_path) as engine:
+            engine.configure({"Skill Level": bot_profile["skill_level"]})
+            result = engine.play(self.board, bot_profile["limit"])
+
+        self.board.push(result.move)
+        return result.move.uci()
 
 
 # Main Game

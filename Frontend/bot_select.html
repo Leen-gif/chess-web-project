@@ -161,37 +161,28 @@
         <a class="menu-link" href="index.html">Hauptmenu</a>
         <a class="menu-link" href="bot_select.html">Gegen Bot</a>
         <a class="menu-link" href="duo.html">PVP</a>
-        <a class="menu-link" href="host.html">Spiel hosten</a>
-        <a class="menu-link" href="join.html">Spiel beitreten</a>
       </nav>
     </aside>
   </main>
 
+  <script src="js/chess-state.js"></script>
   <script>
     const difficultyProfiles = {
       easy: {
-        label: "Einfach",
-        stockfishProfileId: "sf-easy",
-        options: { skill: 3, depth: 4 }
+        label: "Einfach"
       },
       medium: {
-        label: "Mittel",
-        stockfishProfileId: "sf-medium",
-        options: { skill: 8, depth: 8 }
+        label: "Mittel"
       },
       hard: {
-        label: "Schwer",
-        stockfishProfileId: "sf-hard",
-        options: { skill: 16, depth: 12 }
+        label: "Schwer"
       }
     };
 
     function persistDifficulty(key) {
       const profile = difficultyProfiles[key];
       if (!profile) return;
-      localStorage.setItem("botDifficulty", key);
-      localStorage.setItem("stockfishProfileId", profile.stockfishProfileId);
-      localStorage.setItem("stockfishOptions", JSON.stringify(profile.options));
+      window.ChessState.setDifficulty(key);
     }
 
     document.querySelectorAll(".difficulty-card").forEach((card) => {

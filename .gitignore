@@ -29,3 +29,7 @@ Thumbs.db
 # Local temp/runtime
 .tmp/
 Backend/.tmp/
+
+# Local chess engine binaries
+Backend/stockfish/
+stockfish*.exe
